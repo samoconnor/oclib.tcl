@@ -26,6 +26,7 @@ forbid empty $v
 🚫  empty $v
 ```
 
+[oc_assert-1.0.tm](oclib/oc_assert-1.0.tm]
 
 ### Object-before-proc calls and object pipelines
 
@@ -37,6 +38,7 @@ forbid empty $v
 [: "A-B-C" | tolower | split - | lrange 1 end | join -] eq "b-c"
 ```
 
+[oc_object-1.0.tm](oclib/oc_object-1.0.tm]
 
 ### for, in loops
 
@@ -44,6 +46,7 @@ forbid empty $v
 for i in $l {puts $i}
 ```
 
+[oc_base-1.0.tm](oclib/oc_base-1.0.tm]
 
 ### "exists" for variables and dicts
 
@@ -52,12 +55,16 @@ for i in $l {puts $i}
 [exists $dict foo] eq [dict exists $dict foo]
 ```
 
+[oc_base-1.0.tm](oclib/oc_base-1.0.tm]
+
 ### -nocomplain option for "subst"
 
 ```tcl
 set a foo
 [subst -nocomplain {$a $b}] eq {foo $b}
 ```
+
+[oc_string-1.0.tm](oclib/oc_string-1.0.tm]
 
 ### Common subcommands promoted to 1st class commands
 
@@ -91,6 +98,9 @@ tempfile     -> file tempfile
 etc...
 ```
 
+[oc_string-1.0.tm](oclib/oc_string-1.0.tm]
+[oc_dict-1.0.tm](oclib/oc_dict-1.0.tm]
+[oc_file-1.0.tm](oclib/oc_file-1.0.tm]
 
 ### New "string" subcommands 
 
@@ -108,6 +118,8 @@ gzip
 crc32
 md5
 ```
+
+[oc_string-1.0.tm](oclib/oc_string-1.0.tm]
 
 
 ### New "dict" subcommands 
@@ -130,6 +142,9 @@ $c == 3
 
 ```
 
+[oc_dict-1.0.tm](oclib/oc_dict-1.0.tm]
+
+
 ### "parse" command
 
 ```tcl
@@ -145,6 +160,7 @@ $c == 3
 [parse utf8         %E2%9C%93]                       ] eq "✓"
 [parse qstring      l=a%20b%20c&Tick=%E2%9C%93       ] eq {l {a b c} Tick ✓}
 ```
+[oc_parse-1.0.tm](oclib/oc_parse-1.0.tm]
 
 
 ### New "file" subcommands
@@ -159,6 +175,8 @@ file set hello.txt "a,b\n1,2\n"
 [file csv   hello.txt] eq {{a b} {1 2}}
 ```
 
+[oc_file-1.0.tm](oclib/oc_file-1.0.tm]
+
 
 ### exec for binary data
 
@@ -167,6 +185,8 @@ set wav [file get foo.wav]
 set flac [bexec {flac --silent - 2>@ stderr} $wav
 file set foo.flac $flac
 ```
+
+[oc_exec-1.0.tm](oclib/oc_exec-1.0.tm]
 
 
 ### "proc" extension with blocks for contracts, examples, comments and aliass...
@@ -211,6 +231,8 @@ proc parse::utf8 {hex} {
 }
 ```
 
+[oc_proc-1.0.tm](oclib/oc_proc-1.0.tm]
+
 
 ### "retry" error handling loops
 
@@ -229,6 +251,8 @@ retry count 4 {
     after 60000
 }
 ```
+
+[oc_retry-1.0.tm](oclib/oc_retry-1.0.tm]
 
 
 ### Symbolic exit code handling
@@ -253,10 +277,14 @@ retry count 2 {
 }
 ```
 
+[oc_exec-1.0.tm](oclib/oc_exec-1.0.tm]
+
+
 ### Micelaneous list processing commands
 
 lconcat, lfilter, lrm_empty, laverage, lpercentile, lcount, lfirst, lshuffle, push, lsplit...
 
+[oc_list-1.0.tm](oclib/oc_list-1.0.tm]
 
-See oclib/oc_test.tcl for more examples.
+See [oclib/oc_test.tcl](oclib/oc_test.tcl) for more examples.
 
