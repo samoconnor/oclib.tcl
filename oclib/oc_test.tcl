@@ -192,6 +192,11 @@ test equal [foo 10 5] 15
 test equal [errorcode {foo 5 10}] {assert 5 > 10}
 test equal [errorcode {foo a b}] {assert is integer a}
 
+set d {a 1 b 2}
+test equal [errorcode {dict get $d c}] {TCL LOOKUP DICT c}
+test equal [errorcode {dict get $novar c}] {TCL LOOKUP VARNAME novar}
+test equal [errorcode {dict get d c}] {TCL VALUE DICTIONARY}
+
 set l {0 1 2 3 4 5}
 test equal 3 [. $l lindex 3]
 test equal {3 4} [. $l lrange 3 4]

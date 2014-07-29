@@ -40,6 +40,16 @@ forbid empty $v
 
 [oc_object-1.0.tm](oclib/oc_object-1.0.tm)
 
+### errorcode 
+
+```tcl
+set d {a 1 b 2}
+[errorcode {dict get d}]        eq {TCL VALUE DICTIONARY}
+[errorcode {dict get $d c}]     eq {TCL LOOKUP DICT c}
+[errorcode {dict get $novar c}] eq {TCL LOOKUP VARNAME novar}
+```tcl
+
+
 ### for, in loops
 
 ```tcl
@@ -99,7 +109,9 @@ etc...
 ```
 
 [oc_string-1.0.tm](oclib/oc_string-1.0.tm)
+
 [oc_dict-1.0.tm](oclib/oc_dict-1.0.tm)
+
 [oc_file-1.0.tm](oclib/oc_file-1.0.tm)
 
 ### New "string" subcommands 
