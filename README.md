@@ -47,21 +47,21 @@ for i in $l {puts $i}
 
 ### "exists" for variables and dicts
 
-```
+```tcl
 [exists foo      ] eq [info exists foo]
 [exists $dict foo] eq [dict exists $dict foo]
 ```
 
 ### -nocomplain option for "subst"
 
-```
+```tcl
 set a foo
 [subst -nocomplain {$a $b}] eq {foo $b}
 ```
 
 ### Common subcommands promoted to 1st class commands
 
-```
+```tcl
 equal        -> string equal
 is           -> string is
 length       -> string length
@@ -96,7 +96,7 @@ etc...
 
 (also imported as 1st class commands)
 
-```
+```tcl
 prepend
 is_empty
 is_iso_date
@@ -107,13 +107,14 @@ hex
 gzip
 crc32
 md5
+```
 
 
 ### New "dict" subcommands 
 
 (also imported as 1st class commands)
 
-```
+```tcl
 [dict rfc_2822  {To A From B body Hi!}] eq "To: A\r\nFrom: B\r\n\r\nHi!"
 [dict csv       {1 one 2 two 3 three} ] eq "1,one\r\n2,two\r\n3,three\r\n"
 [dict qstring   {a "A B" b ✓ c \[\]}  ] eq "a=A%20B&b=%E2%9C%93&c=%5B%5D"
@@ -131,7 +132,7 @@ $c == 3
 
 ### "parse" command
 
-```
+```tcl
 [parse lines        a\nb\n                           ] eq {a b}
 [parse base64       MTIzNA==                         ] eq 1234
 [parse hex          "20"                             ] eq " "
@@ -150,7 +151,7 @@ $c == 3
 
 (also avaliable as 1st class commands)
 
-```
+```tcl
 file set hello.txt "a,b\n1,2\n"
 
 [file get   hello.txt] eq "a,b\n1,2\n"
@@ -161,7 +162,7 @@ file set hello.txt "a,b\n1,2\n"
 
 ### exec for binary data
 
-```
+```tcl
 set wav [file get foo.wav]
 set flac [bexec {flac --silent - 2>@ stderr} $wav
 file set foo.flac $flac
@@ -170,7 +171,7 @@ file set foo.flac $flac
 
 ### "proc" extension with blocks for contracts, examples, comments and aliass...
 
-```
+```tcl
 proc file_get {file} {
 
     Read entire content of "file".
@@ -193,7 +194,7 @@ proc file_get {file} {
 }
 ```
 
-```
+```tcl
 proc parse::utf8 {hex} {
 
     Parse hex encoded UTF-8.
@@ -213,7 +214,7 @@ proc parse::utf8 {hex} {
 
 ### "retry" error handling loops
 
-```
+```tcl
 retry count 4 {
 
     set res [aws_sqs $aws CreateQueue QueueName $name {*}$attributes]
@@ -234,7 +235,7 @@ retry count 4 {
 
 (As per sysexits.h)
 
-```
+```tcl
 try {
     ...
 } trap {AWS.SimpleQueueService.QueueDeletedRecently} {
@@ -242,7 +243,7 @@ try {
 }
 ```
 
-```
+```tcl
 retry count 2 {
     ...
     exec ./create_queue.tcl "foobar"
