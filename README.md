@@ -1,10 +1,261 @@
 oclib.tcl
 =========
 
-OClib for Tcl. A collection of Tcl extensions.
+OClib for Tcl. A collection of Tcl utilities.
 
 Copyright Sam O'Connor 2014
 
 Licenced for use under the same terms as Tcl 8.6. See:
 http://core.tcl.tk/tcl/artifact/537ba3f664b958496ab51849e23d7f564342014b
 http://github.com/tcltk/tcl/raw/core_8_6_1/license.terms
+
+
+### Assertions
+
+```tcl
+set v "hello"
+
+assert {[llength $v] == 5}
+assert equal [length $v] 5
+✅  equal [length $v] 5
+⊢ [: 7 is integer]
+
+forbid {$v eq {}}
+forbid empty $v
+🚫  is integer $v
+🚫  empty $v
+```
+
+
+### Object-before-proc calls and object pipelines
+
+```tcl
+[with "Hello" tolower] eq "hello"
+[: "Hello" tolower] eq "hello"
+
+[join [lrange [split [tolower "A-B-C"] -] 1 end] -] eq "b-c"
+[: "A-B-C" | tolower | split - | lrange 1 end | join -] eq "b-c"
+```
+
+
+### for, in loops
+
+```tcl
+for i in $l {puts $i}
+```
+
+
+### "exists" for variables and dicts
+
+```
+[exists foo      ] eq [info exists foo]
+[exists $dict foo] eq [dict exists $dict foo]
+```
+
+### -nocomplain option for "subst"
+
+```
+set a foo
+[subst -nocomplain {$a $b}] eq {foo $b}
+```
+
+### Common subcommands promoted to 1st class commands
+
+```
+equal        -> string equal
+is           -> string is
+length       -> string length
+range        -> string range
+reverse      -> string reverse
+tolower      -> string tolower
+toupper      -> string toupper
+trim         -> string trim
+etc...
+
+merge        -> dict merge
+filter       -> dict filter
+keys         -> dict keys
+values       -> dict values
+remove       -> dict remove
+dset         -> dict set
+etc...
+
+copy         -> file copy
+delete       -> file delete
+dirname      -> file dirname
+extension    -> file extension
+isdirectory  -> file isdirectory
+isfile       -> file isfile
+mkdir        -> file mkdir
+tempfile     -> file tempfile
+etc...
+```
+
+
+### New "string" subcommands 
+
+(also imported as 1st class commands)
+
+```
+prepend
+is_empty
+is_iso_date
+lines
+chars
+base64
+hex
+gzip
+crc32
+md5
+
+
+### New "dict" subcommands 
+
+(also imported as 1st class commands)
+
+```
+[dict rfc_2822  {To A From B body Hi!}] eq "To: A\r\nFrom: B\r\n\r\nHi!"
+[dict csv       {1 one 2 two 3 three} ] eq "1,one\r\n2,two\r\n3,three\r\n"
+[dict qstring   {a "A B" b ✓ c \[\]}  ] eq "a=A%20B&b=%E2%9C%93&c=%5B%5D"
+
+set d {a 1 b 2 c 3}
+dict pop d a
+$a == 1
+$d == {b 2 c 3}
+
+assign $d b c
+$b == 2
+$c == 3
+
+```
+
+### "parse" command
+
+```
+[parse lines        a\nb\n                           ] eq {a b}
+[parse base64       MTIzNA==                         ] eq 1234
+[parse hex          "20"                             ] eq " "
+[parse json         {{"foo":"bar","l":["1","2","3"]}}] eq {foo bar l {1 2 3}}
+[parse csv          a,b,c\r\n1,2,3\r\n               ] eq {{a b c} {1 2 3}}
+[parse csv_as_dict  1,one\n2,two\n3,three            ] eq {1 one 2 two 3 three}
+[parse csv_as_dicts a,b,c\n1,2,3\nx,y,z              ] eq {{a 1 b 2 c 3} {a x b y c z}}
+[parse gzip         $gziped                          ]
+[parse rfc_2822     "To: A\r\nFrom: B\r\n\r\nHi!"    ] eq {To A From B body Hi!}
+[parse utf8         %E2%9C%93]                       ] eq "✓"
+[parse qstring      l=a%20b%20c&Tick=%E2%9C%93       ] eq {l {a b c} Tick ✓}
+```
+
+
+### New "file" subcommands
+
+(also avaliable as 1st class commands)
+
+```
+file set hello.txt "a,b\n1,2\n"
+
+[file get   hello.txt] eq "a,b\n1,2\n"
+[file lines hello.txt] eq {{a,b} {1,2}}
+[file csv   hello.txt] eq {{a b} {1 2}}
+```
+
+
+### exec for binary data
+
+```
+set wav [file get foo.wav]
+set flac [bexec {flac --silent - 2>@ stderr} $wav
+file set foo.flac $flac
+```
+
+
+### "proc" extension with blocks for contracts, examples, comments and aliass...
+
+```
+proc file_get {file} {
+
+    Read entire content of "file".
+
+} require {
+
+    is_file $file
+
+} do {
+
+    set f [open $file {RDONLY BINARY}]
+    set result [read $f]
+    close $f
+    return $result
+
+} alias {
+
+    file_read
+    file_read_all
+}
+```
+
+```
+proc parse::utf8 {hex} {
+
+    Parse hex encoded UTF-8.
+    Hex bytes may be prefixed by "%"
+
+} example {
+
+    [parse::utf8 E29C93] eq "✓"
+    [parse::utf8 %E2%9C%93] eq "✓"
+
+} do {
+    set hex [string map {% {}} $hex]
+    encoding convertfrom utf-8 [binary decode hex $hex]
+}
+```
+
+
+### "retry" error handling loops
+
+```
+retry count 4 {
+
+    set res [aws_sqs $aws CreateQueue QueueName $name {*}$attributes]
+
+} trap QueueAlreadyExists {} {
+
+    delete_aws_sqs_queue [aws_sqs_queue $aws $name]
+
+} trap AWS.SimpleQueueService.QueueDeletedRecently {} {
+
+    puts "Waiting 1 minute to re-create SQS Queue \"$name\"..."
+    after 60000
+}
+```
+
+
+### Symbolic exit code handling
+
+(As per sysexits.h)
+
+```
+try {
+    ...
+} trap {AWS.SimpleQueueService.QueueDeletedRecently} {
+    exit EX_TEMPFAIL "Can't reuse queue name immediately after deletion. Please wait..."
+}
+```
+
+```
+retry count 2 {
+    ...
+    exec ./create_queue.tcl "foobar"
+    ...
+} trap {EX_TEMPFAIL} {
+    after 60000
+}
+```
+
+### Micelaneous list processing commands
+
+lconcat, lfilter, lrm_empty, laverage, lpercentile, lcount, lfirst, lshuffle, push, lsplit...
+
+
+See oclib/oc_test.tcl for more examples.
+
